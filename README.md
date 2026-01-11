@@ -54,7 +54,7 @@ converts that instability into stockout risk.
 
 ## Files
 
-- mamba2_inventory_hazard_probability.py  
+- latent_hazard_inventory.py  
   Core implementation of latent hazard and survival-based DOC risk.
 
 - dense_data_260108.txt  
