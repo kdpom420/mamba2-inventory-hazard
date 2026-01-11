@@ -1,53 +1,76 @@
-Latent-State Hazard Modeling for Probabilistic Inventory Risk Using Mamba-2
+# Mamba2 Inventory Hazard Model
 
-Abstract
+This repository implements a probabilistic inventory risk model based on
+latent demand regimes extracted from a Mamba-2 state-space model.
 
-Classical inventory control relies on average-based demand models and deterministic Days of Cover (DOC).
-However, real demand processes exhibit regime shifts that invalidate static DOC estimates.
-We propose a latent-state-driven hazard model in which the hidden states of a Mamba-2 state-space model represent demand regimes, and their energy defines a hazard rate governing stock survival.
-This yields a survival-based formulation of stockout risk and a probabilistic DOC.
-We demonstrate how cumulative stockout probabilities can be computed directly from latent regime instability.
+Instead of predicting a single future demand value, this system estimates
+the probability that inventory will be depleted within a given time window
+(Days of Cover, DOC).
 
-1. Introduction
+---
 
-Inventory depletion is traditionally modeled using point forecasts or fixed safety stock.
-Such approaches fail under regime changes, where demand behavior shifts abruptly.
-We argue that inventory systems should instead be modeled as survival processes under latent demand regimes.
+## Core Idea
 
-2. Latent Regime Modeling with Mamba
+1. A Mamba-2 model is trained on historical usage data.
+2. The hidden states of Mamba are interpreted as latent demand regimes.
+3. The energy (L2 norm) of each latent state is converted into a hazard rate.
+4. This hazard defines a survival function for inventory.
+5. The survival function yields a cumulative stockout probability.
 
-Let h_t denote the hidden state of a trained Mamba-2 model.
-These hidden states encode long-range demand dynamics and implicitly represent demand regimes.
+This transforms inventory management from a deterministic planning problem
+into a probabilistic risk assessment problem.
 
-We define the regime energy:
+---
 
-    E_t = || h_t ||_2
+## Key Formulas
 
-3. Energy-based Hazard
+Latent state energy:
 
-We convert regime energy into a hazard rate:
+E_t = || h_t ||_2
 
-    lambda_t = exp( alpha * (E_t - mean(E)) )
+Hazard:
 
-This ensures that regime instability produces exponentially increasing risk.
+lambda_t = exp( alpha * (E_t - mean(E)) )
 
-4. Survival-based Inventory Risk
+Survival:
 
-Inventory is modeled as a survival process:
+S(t) = exp( -lambda_t * t )
 
-    S(t) = exp( -lambda_t * t )
+Stockout probability:
 
-and stockout probability:
+P(stockout by t) = 1 - S(t)
 
-    P(stockout by t) = 1 - S(t)
+---
 
-DOC is therefore a probabilistic window rather than a deterministic time.
+## Why This Matters
 
-5. Operational Interpretation
+Traditional inventory systems rely on average demand and fixed safety stock.
+They do not account for latent regime shifts.
 
-High latent energy indicates regime instability and reduced forecast validity.
-This directly maps to shorter effective DOC and higher stockout risk.
+This model measures how unstable the current demand regime is and directly
+converts that instability into stockout risk.
 
-6. Conclusion
+---
 
-This framework unifies latent sequence modeling and inventory risk into a survival-theoretic formulation.
+## Files
+
+- mamba2_inventory_hazard_probability.py  
+  Core implementation of latent hazard and survival-based DOC risk.
+
+- dense_data_260108.txt  
+  Dense daily usage and inventory data.
+
+- sparse_data_260108.txt  
+  Irregular transaction-based usage data.
+
+- paper.md  
+  Technical note describing the theoretical formulation.
+
+---
+
+## Intended Use
+
+This repository is intended for:
+- Research on latent-state-driven inventory risk
+- Probabilistic DOC-based inventory control
+- Supply chain risk monitoring
